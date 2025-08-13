@@ -1,6 +1,10 @@
 # RumbleModUIPlus
 ![Photo](https://raw.githubusercontent.com/ninjaguardian/RumbleModUIPlus/master/icon.png)
 
+[![Github](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/available/github_vector.svg)](https://github.com/ninjaguardian/RumbleModUIPlus)
+[![Changelog](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/changelog_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus/changelog)
+[![Thunderstore](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/website_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus)
+
 ## What is this?
 Adds stuff for devs to RumbleModUI.
 
