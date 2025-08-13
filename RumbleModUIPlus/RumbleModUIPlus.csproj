@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<ImplicitUsings>disable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+
+		<Company>$(Authors)</Company>
+		<Title>RumbleModUIPlus</Title>
+		<Authors>ninjaguardian (github)</Authors>
+		<Description>Adds stuff for devs to RumbleModUI</Description>
+		<Copyright>Copyright © 2025 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
+		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/ninjaguardian/RumbleModUIPlus</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<VersionPrefix>1.0.2</VersionPrefix>
+		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+		<FileVersion>$(VersionPrefix).0</FileVersion>
+		<Platform>x64</Platform>
+		<Platforms>x64</Platforms>
+		<PlatformTarget>x64</PlatformTarget>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<Prefer32Bit>False</Prefer32Bit>
+		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus</PackageProjectUrl>
+
+		<LibsDirPath>$(LIBSDIRPATH)</LibsDirPath>
+		<LibsDirPath Condition="'$(LibsDirPath)'==''">C:\Program Files (x86)\Steam\steamapps\common\RUMBLE</LibsDirPath>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<WarningLevel>9999</WarningLevel>
+		<IsPublishable>False</IsPublishable>
+		<StartAction>Program</StartAction>
+		<StartProgram>$(LIBSDIRPATH)\RUMBLE.exe</StartProgram>
+		<StartWorkingDirectory>$(LIBSDIRPATH)</StartWorkingDirectory>
+	</PropertyGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(LIBSDIRPATH)\Mods\&quot;" />
+	</Target>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<WarningLevel>9999</WarningLevel>
+		<IsPublishable>False</IsPublishable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\CHANGELOG.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\manifest.json">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="0Harmony">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\0Harmony.dll</HintPath>
+		</Reference>
+		<Reference Include="MelonLoader">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\MelonLoader.dll</HintPath>
+		</Reference>
+		<Reference Include="ModUI">
+			<HintPath>$(LibsDirPath)\Mods\ModUI.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+
+</Project>
