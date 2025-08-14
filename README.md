@@ -17,9 +17,9 @@ Adds stuff for devs to RumbleModUI.
 
 ## For devs
 <details>
-  <summary>v1.0.0</summary>
+  <summary>v1.0.0-v1.0.1</summary>
   
-  As of v1.0.0, this mod only allows you to change your Settings.txt to use a ModFormatVersion instead of ModVersion. This makes it so the user's settings are not deleted every update. To do this, refrence RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify ModVersion, also specify ModFormatVersion (i.e. `mod.ModFormatVersion = "1.0.0"`).
+  - So far, this mod only allows you to change your Settings.txt to use a ModFormatVersion instead of ModVersion. This makes it so the user's settings are not deleted every update. To do this, refrence RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify ModVersion, also specify ModFormatVersion (i.e. `mod.ModFormatVersion = "1.0.0"`).
 </details>
 
 ## Help And Other Resources
