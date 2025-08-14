@@ -10,7 +10,6 @@ using System.Reflection;
 [assembly: MelonColor(255, 0, 160, 230)]
 [assembly: MelonAuthorColor(255, 0, 160, 230)]
 
-[assembly: MelonPlatform(MelonPlatformAttribute.CompatiblePlatforms.WINDOWS_X64)]
 [assembly: MelonPlatformDomain(MelonPlatformDomainAttribute.CompatibleDomains.IL2CPP)]
 [assembly: VerifyLoaderVersion(RumbleModUIPlus.BuildInfo.MLVersion, true)]
 
@@ -28,7 +27,7 @@ namespace RumbleModUIPlus
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "1.0.0";
+        public const string ModVersion = "1.0.1";
         /// <summary>
         /// MelonLoader version.
         /// </summary>

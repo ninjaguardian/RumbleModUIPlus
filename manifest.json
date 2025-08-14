@@ -1,6 +1,6 @@
 {
     "name": "RumbleModUIPlus",
-    "version_number": "1.0.0",
+    "version_number": "1.0.1",
     "website_url": "https://github.com/ninjaguardian/RumbleModUIPlus",
     "description": "Adds stuff for devs to RumbleModUI",
     "dependencies": [
