@@ -19,12 +19,14 @@
 		<VersionPrefix>1.0.2</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
+		<PackageIcon>icon.png</PackageIcon>
 		<Platform>x64</Platform>
 		<Platforms>x64</Platforms>
 		<PlatformTarget>x64</PlatformTarget>
 		<Prefer32Bit>False</Prefer32Bit>
 		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus</PackageProjectUrl>
 		<SelfContained>false</SelfContained>
+		<Optimize>True</Optimize>
 
 		<LibsDirPath>$(LIBSDIRPATH)</LibsDirPath>
 		<LibsDirPath Condition="'$(LibsDirPath)'==''">C:\Program Files (x86)\Steam\steamapps\common\RUMBLE</LibsDirPath>
@@ -36,6 +38,10 @@
 		<StartAction>Program</StartAction>
 		<StartProgram>$(LIBSDIRPATH)\RUMBLE.exe</StartProgram>
 		<StartWorkingDirectory>$(LIBSDIRPATH)</StartWorkingDirectory>
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<Optimize>False</Optimize>
 	</PropertyGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -79,6 +85,21 @@
 		</Reference>
 		<Reference Include="ModUI">
 			<HintPath>$(LibsDirPath)\Mods\ModUI.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2Cppmscorlib">
+			<HintPath>$(LibsDirPath)\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+		</Reference>
+		<Reference Include="Il2CppInterop.Runtime">
+			<HintPath>$(LibsDirPath)\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
