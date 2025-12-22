@@ -4,7 +4,7 @@ using MelonLoader;
 using RumbleModUI;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -21,6 +21,14 @@ using static RumbleModUI.ModSetting;
 [assembly: VerifyLoaderVersion(RumbleModUIPlus.BuildInfo.MLVersion, true)]
 #endregion
 
+// TODO: allow same name in different folders (needs to work with saving)
+// TODO: format version updater
+// TODO: only delete settings on minor/major versions (or not at all if updater)
+// TODO: write down that format version should only be changed when breaking changes are made
+// TODO: settings names may break with ':' in them
+// TODO: string values may break with ':' in them
+// TODO: maybe store old Tags instance and forward calls to it
+
 namespace RumbleModUIPlus
 {
     /// <summary>
@@ -35,11 +43,11 @@ namespace RumbleModUIPlus
         /// <summary>
         /// Mod version.
         /// </summary>
-        public const string ModVersion = "1.0.2";
+        public const string ModVersion = "2.0.0";
         /// <summary>
         /// MelonLoader version.
         /// </summary>
-        public const string MLVersion = "0.7.0";
+        public const string MLVersion = "0.7.1";
         /// <summary>
         /// Mod author.
         /// </summary>
@@ -89,7 +97,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
 
@@ -131,7 +139,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
 
@@ -171,7 +179,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
             ModSetting<bool> InputSetting = new()
@@ -215,7 +223,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
             ModSetting<int> InputSetting = new()
@@ -254,7 +262,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
             ModSetting<float> InputSetting = new()
@@ -293,7 +301,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == Name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + Name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + Name);
                 return null;
             }
             ModSetting<double> InputSetting = new()
@@ -319,7 +327,6 @@ namespace RumbleModUIPlus
         }
         #endregion
 
-        #region AddFolder
         /// <summary>
         /// Adds a folder to the settings list.
         /// </summary>
@@ -330,7 +337,7 @@ namespace RumbleModUIPlus
         {
             if (Settings.Count > 0 && Settings.Exists(x => x.Name == name))
             {
-                MelonLogger.Msg(DuplicateErrorMsg + ": " + name);
+                MelonLogger.Warning(DuplicateErrorMsg + ": " + name);
                 return null;
             }
 
@@ -349,7 +356,6 @@ namespace RumbleModUIPlus
             Settings.Add(inputSetting);
             return inputSetting;
         }
-        #endregion
     }
 
     /// <summary>
@@ -357,8 +363,12 @@ namespace RumbleModUIPlus
     /// </summary>
     public class RumbleModUIPlusClass : MelonMod
     {
+        /// <inheritdoc/>
+        public override void OnInitializeMelon() => Mod_Log_Patches.PatchAll(HarmonyInstance);
+
+        /* Test thingy
         public override void OnLateInitializeMelon() => UI.instance.UI_Initialized += OnUIInitialized;
-        private void OnUIInitialized()
+        private static void OnUIInitialized()
         {
             Mod ModUI = new()
             {
@@ -366,88 +376,41 @@ namespace RumbleModUIPlus
                 ModVersion = "0",
                 ModFormatVersion = "0"
             };
-            ModUI.SetFolder("delme");
-            ModUI.AddDescriptionAtStart("Description", "", "Lets you change the font for other mods.", new Tags { IsSummary = true });
+            ModUI.SetFolder("deleteme");
+            ModUI.AddDescriptionAtStart("Description", "", "full desc", new Tags { IsSummary = true });
             ModUI.AddFolder("Font Settings", "desc")
                 .AddSetting(ModUI.AddToListAtStart("setting", true, 0, "hehe", new RumbleModUI.Tags()))
-                .AddSetting(ModUI.AddToListAtStart("setting2", false, 0, "hehe2", new RumbleModUI.Tags()))
+                .AddSetting(ModUI.AddToListAtStart("setting2", true, 0, "hehe2", new RumbleModUI.Tags()))
                 .AddSetting(ModUI.AddFolder("folder?")
                     .AddSetting(ModUI.AddToListAtIndex("setting_in_folder", 0, "hehe_in_folder", new RumbleModUI.Tags(), 3))
                     .AddSetting(ModUI.AddToListAtStart("setting_in_folder2", 0, "hehe_in_folder2", new RumbleModUI.Tags()))
-                    .AddSetting(ModUI.AddToList("setting_in_folder3", 0, "hehe_in_folder3", new RumbleModUI.Tags()))
+                    .AddSetting(ModUI.AddToList("setting_in_folder3", 0, "hehe_in_folder3", new Tags()))
                 )
                 .AddSetting(ModUI.AddToList("setting3", true, 0, "hehe3", new RumbleModUI.Tags()));
-            ModUI.AddToListAtStart("a", false, 0, "broken :<", new RumbleModUI.Tags());
+            ModUI.AddToListAtStart("setting", true, 0, "ttt", new RumbleModUI.Tags());
+            ModUI.EnableDebug();
+            ModUI.GetFromFile();
             UI.instance.AddMod(ModUI);
         }
+        */
 
         #region Harmony Patch Helpers
-        private static readonly string RumbleModTypeFullName = typeof(RumbleModUI.Mod).FullName;
-        private static readonly string[] SpecialNames = { nameof(RumbleModUI.Mod.SaveModData), nameof(RumbleModUI.Mod.GetFromFile) };
-
-        private static bool WasCalledFromSpecial()
-        {
-            StackTrace st = new(1);
-            StackFrame[] frames = st.GetFrames();
-            if (frames.Length == 0) return false;
-
-            for (int i = 0; i < Math.Min(frames.Length, 20); i++) // 20 is a safeguard
-            {
-                if (IsMethodMatchingAny(frames[i]?.GetMethod(), SpecialNames)) return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsMethodMatchingAny(MethodBase method, string[] targetNames)
-        {
-            if (method == null) return false;
-
-            Type dt = method.DeclaringType ?? method.ReflectedType;
-            if (dt != null && dt.FullName == RumbleModTypeFullName)
-            {
-                foreach (string targetName in targetNames)
-                    if (method.Name == targetName)
-                        return true;
-            }
-
-            foreach (string targetName in targetNames)
-            {
-                if (method.Name == $"DMD<{RumbleModTypeFullName}::{targetName}>")
-                    return true;
-            }
-
-            return false;
-        }
-
         private static FieldInfo Mod_Options = AccessTools.Field(typeof(UI), "Mod_Options");
         private static FieldInfo ModSelection = AccessTools.Field(typeof(UI), "ModSelection");
         private static FieldInfo SettingsSelection = AccessTools.Field(typeof(UI), "SettingsSelection");
-        private static FieldInfo UI_DropDown_Settings = AccessTools.Field(typeof(UI), "UI_DropDown_Settings");
         private static FieldInfo SettingsOverride = AccessTools.Field(typeof(UI), "SettingsOverride");
+        private static FieldInfo UI_DropDown_Settings = AccessTools.Field(typeof(UI), "UI_DropDown_Settings");
         private static MethodInfo DoOnModSelect = AccessTools.Method(typeof(UI), "DoOnModSelect");
+        private static FieldInfo Mod_Folders = AccessTools.Field(typeof(RumbleModUI.Mod), "Folders");
+        private static FieldInfo Mod_debug = AccessTools.Field(typeof(RumbleModUI.Mod), "debug");
+        private static MethodInfo Mod_IsFileLoadedSetter = AccessTools.PropertySetter(typeof(RumbleModUI.Mod), "IsFileLoaded");
+        private static MethodInfo Mod_ValueValidation = AccessTools.Method(typeof(RumbleModUI.Mod), "ValueValidation");
         private static RumbleModUI.Mod getSelectedMod(UI instance) => ((List<RumbleModUI.Mod>)Mod_Options.GetValue(instance))[(int)ModSelection.GetValue(instance)];
         private static int getSelectedModSettingIndex(UI instance) => (int)SettingsSelection.GetValue(instance);
-        private static ModSetting getSelectedModSetting(UI instance) => getSelectedMod(instance).Settings[getSelectedModSettingIndex(instance)];
         private static TMP_Dropdown getUI_DropDown_Settings(UI instance) => ((UnityEngine.GameObject)UI_DropDown_Settings.GetValue(instance)).GetComponent<TMP_Dropdown>();
         #endregion
 
         #region Harmony Patches
-        [HarmonyPatch(typeof(RumbleModUI.Mod), nameof(RumbleModUI.Mod.ModVersion), MethodType.Getter)]
-        private static class ModVersion_Getter_Patch
-        {
-            private static bool Prefix(RumbleModUI.Mod __instance, ref string __result)
-            {
-                if (__instance is Mod mod && WasCalledFromSpecial())
-                {
-                    __result = mod.ModFormatVersion;
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
         [HarmonyPatch(typeof(UI), "DoOnSettingsSelect")]
         private static class UI_DoOnSettingsSelect_Patch
         {
@@ -458,10 +421,10 @@ namespace RumbleModUIPlus
                 if (mod.Settings[idx] is not ModSettingFolder modSettingFolder) return;
                 UI_OnSettingsSelectionChange_Patch.Empty(__instance);
                 Il2CppSystem.Collections.Generic.List<string> list = new();
-                list.Add(UI_OnSettingsSelectionChange_Patch.BackText);
+                list.Add("<―― back");
                 List<LinkGroup> linkGroups = mod.LinkGroups;
-                Dictionary<int, object> itemLookup = UI_OnSettingsSelectionChange_Patch.ItemLookup[__instance];
-                itemLookup.Add(0, modSettingFolder.Parent);
+                Dictionary<int, int> itemLookup = UI_OnSettingsSelectionChange_Patch.ItemLookup[__instance];
+                itemLookup.Add(0, mod.Settings.IndexOf(modSettingFolder.Parent));
                 int newIdx = -1;
 
                 for (int i = 0, i1 = list.Count; i < mod.Settings.Count; i++)
@@ -493,54 +456,81 @@ namespace RumbleModUIPlus
                 else
                     UI_DropDown_Settings.SetValueWithoutNotify(newIdx);
             }
-
-            //private static bool Prefix(UI __instance)
-            //{
-            //    if (getSelectedModSetting(__instance) is not ModSettingFolder modSettingFolder) return true;
-
-            //    TMP_Dropdown UI_DropDown_Settings = getUI_DropDown_Settings(__instance);
-            //    List<ModSetting> settings = getSelectedMod(__instance).Settings;
-            //    TMP_Dropdown_Show_Patch.HiddenOptions.Clear();
-            //    for (int i = 0; i < UI_DropDown_Settings.options.Count; i++)
-            //        if (!modSettingFolder.Settings.Contains(settings[i]))
-            //            TMP_Dropdown_Show_Patch.HiddenOptions.Add(UI_DropDown_Settings.options[i]);
-
-            //    return false;
-            //}
         }
 
         [HarmonyPatch(typeof(UI), "DoOnModSelect")]
         private static class UI_DoOnModSelect_Patch
         {
-            private static readonly Dictionary<UI, List<ModSetting>> settingsLookup = new();
+            private static readonly Dictionary<UI, SettingOverride> settingOverride = new();
+            private static readonly Dictionary<UI, int> settingIdx = new();
+
+            private class SettingOverride
+            {
+                internal int firstSummary = -1;
+                internal int firstNonFolder = -1;
+            }
 
             private static void Prefix(UI __instance)
             {
-                settingsLookup.Add(__instance, getSelectedMod(__instance).Settings);
+                if ((int)SettingsOverride.GetValue(__instance) == 0)
+                    settingOverride.Add(__instance, new SettingOverride());
+                settingIdx.Add(__instance, 0);
                 UI_OnSettingsSelectionChange_Patch.Empty(__instance);
             }
 
             private static bool DoContinue(UI instance, ModSetting setting)
             {
+                int idx = settingIdx[instance]++;
                 if (setting.Tags is Tags { InFolder: true }) { return true; }
 
-                UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Add(UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Count, settingsLookup[instance].IndexOf(setting));
+                int count = UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Count;
+
+                if (settingOverride.TryGetValue(instance, out SettingOverride so))
+                {
+                    if (so.firstSummary == -1 && setting.Tags.IsSummary)
+                        so.firstSummary = count;
+                    else if (so.firstNonFolder == -1 && setting is not ModSettingFolder)
+                        so.firstNonFolder = count;
+                }
+
+                UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Add(count, idx);
                 return false;
             }
 
             private static void Finalizer(UI __instance)
             {
-                if (__instance != null && !settingsLookup.Remove(__instance))
-                    MelonLogger.Error("Removal of UI failed");
+                if (__instance != null)
+                {
+                    settingOverride.Remove(__instance);
 
-                if (UI_OnSettingsSelectionChange_Patch.ItemLookup.TryGetValue(__instance, out Dictionary<int, object> map))
-                    UI_OnSettingsSelectionChange_Patch.SimplifyItemLookup(__instance, map);
+                    if (!settingIdx.Remove(__instance))
+                        MelonLogger.Error("Removal of UI from settingIdx failed");
+
+                    if (UI_OnSettingsSelectionChange_Patch.ItemLookup.TryGetValue(__instance, out Dictionary<int, int> map))
+                        UI_OnSettingsSelectionChange_Patch.SimplifyItemLookup(__instance, map);
+                }
             }
+
+            private static void SettingsOverrideHelper(UI instance)
+            {
+                if (settingOverride.TryGetValue(instance, out SettingOverride so))
+                {
+                    SettingsOverride.SetValue(instance,
+                        so.firstSummary != -1
+                            ? so.firstSummary
+                            : so.firstNonFolder != -1
+                                ? so.firstNonFolder
+                                : 0
+                    );
+
+                    settingOverride.Remove(instance);
+                }
+            }
+
+            private static int LookupSetting(UI instance, int settingOverride) => UI_OnSettingsSelectionChange_Patch.ItemLookup.TryGetValue(instance, out Dictionary<int, int> dict) && dict.TryGetValue(settingOverride, out int original) ? original : settingOverride;
 
             private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
             {
-                // TODO: EmitDelegate? also make the 'special' stuff use EmitDelegate too.
-                // TODO: May not work with whatever SettingsOverride is
                 return new CodeMatcher(instructions, generator)
                     .Start()
                     .MatchForward(false,
@@ -570,64 +560,60 @@ namespace RumbleModUIPlus
                         new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(UI_DoOnModSelect_Patch), nameof(DoContinue))),
                         new CodeInstruction(OpCodes.Brtrue, label)
                     )
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldfld),
+                        new CodeMatch(OpCodes.Ldc_I4_0),
+                        new CodeMatch(OpCodes.Cgt_Un),
+                        new CodeMatch(OpCodes.Stloc_S)
+                    )
+                    .ThrowIfInvalid("Could not match: this.SettingsOverride != 0")
+                    .InsertAndAdvance(
+                        new CodeInstruction(OpCodes.Ldarg_0),
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(UI_DoOnModSelect_Patch), nameof(SettingsOverrideHelper)))
+                    )
+                    .RemoveInstructions(8)
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldfld),
+                        new CodeMatch(OpCodes.Stfld)
+                    )
+                    .ThrowIfInvalid("Could not match: this.SettingsSelection = this.SettingsOverride")
+                    .Insert(
+                        new CodeInstruction(OpCodes.Ldarg_0)
+                    )
+                    .Advance(4)
+                    .Insert(
+                        new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(UI_DoOnModSelect_Patch), nameof(LookupSetting)))
+                    )
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Callvirt, AccessTools.PropertySetter(typeof(TMP_Dropdown), nameof(TMP_Dropdown.value)))
+                    )
+                    .ThrowIfInvalid("Could not match callvirt TMP_Dropdown.value setter")
+                    .SetOperandAndAdvance(
+                        AccessTools.Method(typeof(TMP_Dropdown), nameof(TMP_Dropdown.SetValueWithoutNotify), new[] { typeof(int) })
+                    )
+                    .MatchForward(false,
+                        new CodeMatch(OpCodes.Nop),
+                        new CodeMatch(OpCodes.Ldarg_0),
+                        new CodeMatch(OpCodes.Ldc_I4_0),
+                        new CodeMatch(OpCodes.Stfld, AccessTools.Field(typeof(UI), "SettingsSelection")),
+                        new CodeMatch(OpCodes.Nop)
+                    )
+                    .ThrowIfInvalid("Could not match else")
+                    .Advance(-1)
+                    .RemoveInstructions(6)
                     .InstructionEnumeration();
             }
-
-            //private static void Postfix(UI __instance)
-            //{
-            //    TMP_Dropdown UI_DropDown_Settings = getUI_DropDown_Settings(__instance);
-            //    List<ModSetting> settings = getSelectedMod(__instance).Settings;
-            //    TMP_Dropdown_Show_Patch.HiddenOptions.Clear();
-            //    for (int i = 0; i < UI_DropDown_Settings.options.Count; i++)
-            //        if (settings[i].Tags is Tags { InFolder: true })
-            //            TMP_Dropdown_Show_Patch.HiddenOptions.Add(UI_DropDown_Settings.options[i]);
-            //}
         }
-
-        //[HarmonyPatch(typeof(TMP_Dropdown), nameof(TMP_Dropdown.Show))]
-        //private static class TMP_Dropdown_Show_Patch
-        //{
-        //    internal static readonly HashSet<TMP_Dropdown.OptionData> HiddenOptions = new();
-        //    private static readonly Dictionary<TMP_Dropdown, Il2CppSystem.Collections.Generic.List<TMP_Dropdown.OptionData>> Originals = new();
-
-        //    private static void Prefix(TMP_Dropdown __instance)
-        //    {
-        //        Il2CppSystem.Collections.Generic.List<TMP_Dropdown.OptionData> visibleOptions = new();
-        //        foreach (TMP_Dropdown.OptionData optionData in __instance.options)
-        //            if (!HiddenOptions.Contains(optionData))
-        //                visibleOptions.Add(optionData);
-
-        //        if (!Originals.TryAdd(__instance, __instance.options))
-        //            MelonLogger.Error("Failed to add TMP_Dropdown");
-
-        //        __instance.options = visibleOptions;
-        //    }
-
-        //    private static void Finalizer(TMP_Dropdown __instance)
-        //    {
-        //        if (__instance != null && Originals.TryGetValue(__instance, out Il2CppSystem.Collections.Generic.List<TMP_Dropdown.OptionData> original))
-        //        {
-        //            try
-        //            {
-        //                __instance.options = original;
-        //            }
-        //            catch (Exception e)
-        //            {
-        //                MelonLogger.Error("Restoration failed", e);
-        //            }
-        //            if (!Originals.Remove(__instance))
-        //                MelonLogger.Error("Removal of TMP_Dropdown failed");
-        //        }
-        //    }
-        //}
 
         [HarmonyPatch(typeof(UI), "OnSettingsSelectionChange")]
         private static class UI_OnSettingsSelectionChange_Patch
         {
-            internal static readonly Dictionary<UI, Dictionary<int, object>> ItemLookup = new();
-            internal const string BackText = "<―― back";
+            internal static readonly Dictionary<UI, Dictionary<int, int>> ItemLookup = new();
 
-            internal static void SimplifyItemLookup(UI instance, Dictionary<int, object> map)
+            internal static void SimplifyItemLookup(UI instance, Dictionary<int, int> map)
             {
                 foreach (int key in map.Keys.Where(k =>
                     k == 0
@@ -640,76 +626,137 @@ namespace RumbleModUIPlus
                     ItemLookup.Remove(instance);
             }
 
-            //private static void Prefix(UI __instance, ref int Input)
-            //{
-            //    if (ItemLookup.TryGetValue(__instance, out Dictionary<int, object> dict) && dict.TryGetValue(Input, out object original))
-            //    {
-            //        if (original is not int originalInt)
-            //        {
-            //            Empty(__instance);
-            //            Dictionary<int, object> itemLookup = ItemLookup[__instance];
-            //            Il2CppSystem.Collections.Generic.List<string> list = new();
-            //            RumbleModUI.Mod mod = getSelectedMod(__instance);
-            //            List<LinkGroup> linkGroups = mod.LinkGroups;
-            //            List<ModSetting> settings = mod.Settings;
-            //            ModSettingFolder parent = (ModSettingFolder) original;
-            //            if (parent != null)
-            //            {
-            //                list.Add(BackText);
-            //                itemLookup.Add(0, parent.Parent);
-            //            }
-            //            for (int i = 0; i < settings.Count; i++)
-            //            {
-            //                ModSetting setting = settings[i];
-            //                if (parent == null
-            //                    ? setting.Tags is not Tags { InFolder: true }
-            //                    : (parent.Settings.Contains(setting) || setting == parent)
-            //                )
-            //                {
-            //                    itemLookup.Add(itemLookup.Count, i);
-            //                    if (setting.ValueType == AvailableTypes.Boolean && setting.LinkGroup != 0)
-            //                        list.Add(linkGroups.Find(x => x.Index == setting.LinkGroup).Name + " - " + setting.Name);
-            //                    else
-            //                        list.Add(setting.Name);
-            //                }
-            //            }
-            //            SimplifyItemLookup(__instance, itemLookup);
-            //            TMP_Dropdown UI_DropDown_Settings = getUI_DropDown_Settings(__instance);
-            //            UI_DropDown_Settings.ClearOptions();
-            //            UI_DropDown_Settings.AddOptions(list);
-            //            UI_DropDown_Settings.SetValueWithoutNotify(0);
-            //            Input = 0;
-            //        }
-            //        else
-            //            Input = originalInt;
-            //    }
-            //}
-
             private static bool Prefix(UI __instance, ref int Input)
             {
-                if (ItemLookup.TryGetValue(__instance, out Dictionary<int, object> dict) && dict.TryGetValue(Input, out object original))
+                if (ItemLookup.TryGetValue(__instance, out Dictionary<int, int> dict) && dict.TryGetValue(Input, out int original))
                 {
-                    if (original is not int originalInt)
+                    if (original == -1)
                     {
-                        ModSettingFolder parent = (ModSettingFolder) original;
-                        if (parent == null)
-                        {
-                            SettingsOverride.SetValue(__instance, 0);
-                            DoOnModSelect.Invoke(__instance, null);
-                            return false;
-                        }
-                        Input = getSelectedMod(__instance).Settings.IndexOf(parent);
+                        SettingsOverride.SetValue(__instance, 0);
+                        DoOnModSelect.Invoke(__instance, null);
+                        return false;
                     }
-                    else
-                        Input = originalInt;
+                    Input = original;
                 }
                 return true;
             }
 
             internal static void Empty(UI instance)
             {
-                if (!ItemLookup.TryAdd(instance, new Dictionary<int, object>()))
+                if (!ItemLookup.TryAdd(instance, new Dictionary<int, int>()))
                     ItemLookup[instance].Clear();
+            }
+        }
+
+        private static class Mod_Log_Patches
+        {
+            internal static void PatchAll(HarmonyLib.Harmony harmony)
+            {
+                foreach (MethodInfo method in typeof(RumbleModUI.Mod).GetMethods())
+                    if (method.DeclaringType == typeof(RumbleModUI.Mod))
+                        harmony.Patch(
+                            original: method,
+                            transpiler: GetTranspiler
+                        );
+            }
+
+            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator) => new CodeMatcher(instructions, generator)
+                .Start()
+                .MatchForward(false, MelonLoggerMsg)
+                .Repeat(match => {
+                    match.RemoveInstruction();
+                    match.InsertAndAdvance(MelonLoggerWarning);
+                })
+                .InstructionEnumeration();
+
+            private static readonly CodeMatch MelonLoggerMsg = new(OpCodes.Call, AccessTools.Method(typeof(MelonLogger), nameof(MelonLogger.Msg), new[] { typeof(string) }));
+            private static readonly CodeInstruction MelonLoggerWarning = new(OpCodes.Call, AccessTools.Method(typeof(MelonLogger), nameof(MelonLogger.Warning), new[] { typeof(string) }));
+            private static HarmonyMethod GetTranspiler => new(typeof(Mod_Log_Patches).GetMethod(nameof(Transpiler), BindingFlags.NonPublic | BindingFlags.Static));
+        }
+
+        [HarmonyPatch(typeof(UI), "SaveSettings")]
+        private static class UI_SaveSettings_Patch
+        {
+            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                foreach (CodeInstruction instruction in instructions)
+                {
+                    yield return instruction;
+                    if (instruction.opcode == OpCodes.Ldstr && instruction.operand is string s && s.StartsWith("Created by: "))
+                    {
+                        yield return new CodeInstruction(OpCodes.Ldarg_0);
+                        yield return Transpilers.EmitDelegate<Func<string, UI, string>>((str, instance) => getSelectedMod(instance) is Mod mod ? str + " and " + BuildInfo.ModName + " " + BuildInfo.ModVersion : str);
+                    }
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(RumbleModUI.Mod), nameof(RumbleModUI.Mod.GetFromFile))]
+        private static class Mod_GetFromFile_Patch
+        {
+            private static bool Prefix(RumbleModUI.Mod __instance)
+            {
+                Baum_API.Folders Folders = (Baum_API.Folders)Mod_Folders.GetValue(__instance);
+                bool debug = (bool)Mod_debug.GetValue(__instance);
+
+                string subFolder = Folders.GetSubFolder(0);
+                string Path = (subFolder == null
+                    ? Folders.GetFolderString()
+                    : Folders.GetFolderString(subFolder))
+                    + @"\" + __instance.SettingsFile;
+
+                if (File.Exists(Path))
+                {
+                    string[] Lines = File.ReadAllLines(Path);
+                    if (Lines.Length >= 2 && Lines[0] == __instance.ModName + " " + (__instance is Mod mod ? mod.ModFormatVersion : __instance.ModVersion))
+                    {
+                        HashSet<ModSetting> processed = new();
+                        for (int i = 2; i < Lines.Length; i++)
+                        {
+                            string line = Lines[i];
+                            foreach (ModSetting setting in __instance.Settings)
+                            {
+                                if (processed.Contains(setting) || setting.Tags.DoNotSave || !line.StartsWith(setting.Name + ": ")) continue;
+
+                                if ((bool)Mod_ValueValidation.Invoke(__instance, new object[] { line[(setting.Name.Length + 2)..], setting }))
+                                    setting.SavedValue = setting.Value;
+                                else
+                                    MelonLogger.Msg(__instance.ModName + " - " + setting.Name + " File Read Error.");
+
+                                if (debug)
+                                    MelonLogger.Msg(__instance.ModName + " - " + setting.Name + " " + setting.Value);
+
+                                processed.Add(setting);
+                                break;
+                            }
+                        }
+                        Mod_IsFileLoadedSetter.Invoke(__instance, new object[] { true });
+                    }
+                    else
+                    {
+                        Mod_IsFileLoadedSetter.Invoke(__instance, new object[] { false });
+                        if (Lines.Length < 2)
+                            MelonLogger.Error($"Could not load {__instance.ModName}'s settings because there were less than two lines in the settings file.");
+                        else if (debug)
+                            MelonLogger.Warning(__instance.ModName + "'s settings did not match pattern.");
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        [HarmonyPatch(typeof(RumbleModUI.Mod), nameof(RumbleModUI.Mod.SaveModData))]
+        private static class Mod_SaveModData
+        {
+            private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                MethodInfo get_ModVersion = AccessTools.PropertyGetter(typeof(RumbleModUI.Mod), nameof(RumbleModUI.Mod.ModVersion));
+                foreach (CodeInstruction instruction in instructions)
+                    if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method && method == get_ModVersion)
+                        yield return Transpilers.EmitDelegate<Func<RumbleModUI.Mod, string>>(instance => instance is Mod mod ? mod.ModFormatVersion : instance.ModVersion);
+                    else
+                        yield return instruction;
             }
         }
         #endregion
@@ -718,7 +765,7 @@ namespace RumbleModUIPlus
         /// <returns>The current selected <see cref="RumbleModUI.Mod"/> in the UI.</returns>
         public static RumbleModUI.Mod GetSelectedMod() => getSelectedMod(UI.instance);
         /// <returns>The current selected <see cref="ModSetting"/> in the UI.</returns>
-        public static ModSetting GetSelectedModSetting() => getSelectedModSetting(UI.instance);
+        public static ModSetting GetSelectedModSetting() => getSelectedMod(UI.instance).Settings[getSelectedModSettingIndex(UI.instance)];
         #endregion
     }
 
@@ -735,14 +782,14 @@ namespace RumbleModUIPlus
         /// <summary>
         /// The parent folder of this folder, or null if it's in the root.
         /// </summary>
-        internal ModSettingFolder Parent = null;
+        internal ModSettingFolder Parent;
 
         /// <summary>
         /// Adds a <see cref="ModSetting"/> to the folder and sets <see cref="Tags.InFolder"/> to true.
         /// If needed, converts the setting's <see cref="ModSetting.Tags"/> to <see cref="Tags"/>.
         /// </summary>
         /// <param name="setting">The <see cref="ModSetting"/> to add to the folder</param>
-        /// <returns>The instance (for chaining)</returns>
+        /// <returns>The <see cref="ModSettingFolder"/> instance (for chaining)</returns>
         public ModSettingFolder AddSetting(ModSetting setting)
         {
             if (setting.Tags is Tags tags)
@@ -774,7 +821,7 @@ namespace RumbleModUIPlus
         /// </summary>
         /// <param name="setting">The <see cref="ModSetting"/> that will be removed.</param>
         /// <param name="success">Was the <see cref="ModSetting"/> removed successfully?</param>
-        /// <returns>The instance (for chaining)</returns>
+        /// <returns>The <see cref="ModSettingFolder"/> instance (for chaining)</returns>
         public ModSettingFolder RemoveSettingC(ModSetting setting, out bool success)
         {
             success = RemoveSetting(setting);
@@ -786,7 +833,7 @@ namespace RumbleModUIPlus
         /// Unlike <see cref="RemoveSetting"/>, this returns the instance for chaining.
         /// </summary>
         /// <param name="setting">The <see cref="ModSetting"/> that will be removed.</param>
-        /// <returns>The instance (for chaining)</returns>
+        /// <returns>The <see cref="ModSettingFolder"/> instance (for chaining)</returns>
         public ModSettingFolder RemoveSettingC(ModSetting setting)
         {
             RemoveSetting(setting);
@@ -794,16 +841,9 @@ namespace RumbleModUIPlus
         }
 
         /// <summary>
-        /// Removes this folder. All settings in the folder will be put into the mod's root settings list.
-        /// </summary>
-        /// <param name="mod">The <see cref="RumbleModUI.Mod"/> that has this folder</param>
-        /// <returns>Was this removed successfully?</returns>
-        public bool RemoveFolder(RumbleModUI.Mod mod) => RemoveFolder(mod.Settings);
-
-        /// <summary>
         /// Removes all the settings from the folder and sets their <see cref="Tags.InFolder"/> to false.
         /// </summary>
-        /// <returns>The instance (for chaining)</returns>
+        /// <returns>The <see cref="ModSettingFolder"/> instance (for chaining)</returns>
         public ModSettingFolder RemoveAllSettings()
         {
             foreach (ModSetting setting in Settings)
@@ -821,6 +861,14 @@ namespace RumbleModUIPlus
             RemoveAllSettings();
             return settings.Remove(this);
         }
+
+        /// <summary>
+        /// Removes this folder. All settings in the folder will be put into the mod's root settings list.
+        /// </summary>
+        /// <param name="mod">The <see cref="RumbleModUI.Mod"/> that has this folder</param>
+        /// <returns>Was this removed successfully?</returns>
+        public bool RemoveFolder(RumbleModUI.Mod mod) => RemoveFolder(mod.Settings);
+
 
         /// <inheritdoc/>
         public override string GetValueAsString() => "";

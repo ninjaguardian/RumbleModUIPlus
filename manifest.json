@@ -1,10 +1,10 @@
 {
     "name": "RumbleModUIPlus",
-    "version_number": "1.0.2",
+    "version_number": "2.0.0",
     "website_url": "https://github.com/ninjaguardian/RumbleModUIPlus",
-    "description": "Adds stuff for devs to RumbleModUI",
+    "description": "Adds stuff for devs to RumbleModUI (also some bug fixes)",
     "dependencies": [
-        "LavaGang-MelonLoader-0.7.0",
+        "LavaGang-MelonLoader-0.7.1",
         "Baumritter-RumbleModUI-2.1.2"
     ]
 }

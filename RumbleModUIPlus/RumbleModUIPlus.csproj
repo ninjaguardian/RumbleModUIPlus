@@ -8,7 +8,7 @@
 		<Company>$(Authors)</Company>
 		<Title>RumbleModUIPlus</Title>
 		<Authors>ninjaguardian (github)</Authors>
-		<Description>Adds stuff for devs to RumbleModUI</Description>
+		<Description>Adds stuff for devs to RumbleModUI (also some bug fixes)</Description>
 		<Copyright>Copyright © 2025 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
 		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
@@ -16,7 +16,7 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ninjaguardian/RumbleModUIPlus</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>1.0.2</VersionPrefix>
+		<VersionPrefix>2.0.0</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
 		<FileVersion>$(VersionPrefix).0</FileVersion>
 		<PackageIcon>icon.png</PackageIcon>
@@ -27,14 +27,14 @@
 		<PackageProjectUrl>https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus</PackageProjectUrl>
 		<SelfContained>false</SelfContained>
 		<Optimize>True</Optimize>
+		<WarningLevel>9999</WarningLevel>
+		<IsPublishable>False</IsPublishable>
 
 		<LibsDirPath>$(LIBSDIRPATH)</LibsDirPath>
 		<LibsDirPath Condition="'$(LibsDirPath)'==''">C:\Program Files (x86)\Steam\steamapps\common\RUMBLE</LibsDirPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<WarningLevel>9999</WarningLevel>
-		<IsPublishable>False</IsPublishable>
 		<StartAction>Program</StartAction>
 		<StartProgram>$(LIBSDIRPATH)\RUMBLE.exe</StartProgram>
 		<StartWorkingDirectory>$(LIBSDIRPATH)</StartWorkingDirectory>
@@ -47,11 +47,6 @@
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(LIBSDIRPATH)\Mods\&quot;" />
 	</Target>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<WarningLevel>9999</WarningLevel>
-		<IsPublishable>False</IsPublishable>
-	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\icon.png">
