@@ -5,14 +5,15 @@ permissions:
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
     tags: [ "v*" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    environment: check
 
     outputs:
       dllversion: ${{ steps.setversion.outputs.dllversion }}
@@ -22,10 +23,9 @@ jobs:
         with:
           sparse-checkout: |
             manifest.json
-            RumbleModUIPlus/RumbleModUIPlus.csproj
-            RumbleModUIPlus/Mod.cs
+            ${{ vars.CSPROJ_LOCATION }}
+            ${{ vars.BUILDINFO_LOCATION }}
             CHANGELOG.md
-
 
       - name: Get version from manifest
         id: setversion
@@ -40,7 +40,7 @@ jobs:
       - name: Check .csproj
         shell: bash
         run: |
-          version_number=$(awk -F'[<>]' '/<VersionPrefix>/ {print $3}' RumbleModUIPlus/RumbleModUIPlus.csproj)
+          version_number=$(awk -F'[<>]' '/<VersionPrefix>/ {print $3}' ${{ vars.CSPROJ_LOCATION }})
           if [ "$version_number" != "$VERSIONNUM" ]; then
             echo "Error: got version $version_number, expected $VERSIONNUM"
             exit 1
@@ -49,7 +49,7 @@ jobs:
       - name: Check .cs
         shell: bash
         run: |
-          version_number=$(awk -F'"' '/const string ModVersion/ {print $2; exit}' RumbleModUIPlus/Mod.cs)
+          version_number=$(awk -F'"' '/const string ModVersion/ {print $2; exit}' ${{ vars.BUILDINFO_LOCATION }})
           if [ "$version_number" != "$VERSIONNUM" ]; then
             echo "Error: got version $version_number, expected $VERSIONNUM"
             exit 1
@@ -243,7 +243,8 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           winget upgrade winget --accept-package-agreements --accept-source-agreements --disable-interactivity
-          winget install Microsoft.PowerShell.Preview --disable-interactivity # TODO: switch off preview. make sure to change other steps that use preview. also remove install entirely when gh actions supports powershell with .net 10
+          # TODO: switch off preview. make sure to change other steps that use preview. also remove install entirely when gh actions supports powershell with .net 10
+          winget install Microsoft.PowerShell.Preview --disable-interactivity
           $Url = "https://www.7-zip.org/download.html"
           $Html = Invoke-WebRequest -Uri $Url
           $Html.Content -match 'Download 7-Zip (\d+\.\d+)'
@@ -371,7 +372,7 @@ jobs:
           Remove-Item $assemblyParent -Recurse -Force
           Remove-Item $outExtractDir -Recurse -Force
 
-      - name: Setup .NET SDK
+      - name: Setup .NET SDK 6.0
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '6.0.x'
@@ -384,7 +385,7 @@ jobs:
       #     dotnet workload clean
 
       - name: Build
-        run: dotnet build --configuration Release --no-self-contained -o "Fontifier\bin\Release" /p:LIBSDIRPATH=${{ env.LIBSDIRPATH }}
+        run: dotnet build --configuration Release --no-self-contained -o "${{ vars.DLLNAME_NO_EXT }}\bin\Release" /p:LIBSDIRPATH=${{ env.LIBSDIRPATH }}
       
       - name: Test
         run: dotnet test --configuration Release --no-build --no-restore --verbosity normal /p:LIBSDIRPATH=${{ env.LIBSDIRPATH }}
@@ -394,9 +395,9 @@ jobs:
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $binPath = "Fontifier\bin\Release"
-          New-Item -ItemType Directory -Force -Path $binPath\artifactsetup\Mods | Out-Null
-          Move-Item -Path $binPath\RumbleModUIPlus.dll -Destination $binPath\artifactsetup\Mods
+          $binPath = "${{ vars.DLLNAME_NO_EXT }}\bin\Release"
+          New-Item -ItemType Directory -Force -Path $binPath\artifactsetup\Mods
+          Move-Item -Path $binPath\${{ vars.DLLNAME_NO_EXT }}.dll -Destination $binPath\artifactsetup\Mods
           Copy-Item -Path CHANGELOG.md -Destination $binPath\artifactsetup
           Copy-Item -Path README.md -Destination $binPath\artifactsetup
           Copy-Item -Path icon.png -Destination $binPath\artifactsetup
@@ -409,7 +410,7 @@ jobs:
         if: ${{ env.DLLVERSION != '' }}
         uses: actions/upload-artifact@v6
         with:
-         name: ninjaguardian-RumbleModUIPlus-${{ env.DLLVERSION }}
+         name: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}
          path: ${{ env.BINPATH }}\artifactsetup
 
   release:
@@ -429,14 +430,14 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v7
         with:
-          name: ninjaguardian-RumbleModUIPlus-${{ env.DLLVERSION }}
+          name: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}
           path: artifact-download
 
       - name: Zip artifact
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          Compress-Archive -Path artifact-download\* -DestinationPath ninjaguardian-RumbleModUIPlus-${{ env.DLLVERSION }}.zip
+          Compress-Archive -Path artifact-download\* -DestinationPath ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
 
       - name: Extract changelog for release
         shell: pwsh
@@ -481,7 +482,7 @@ jobs:
       - name: Create GitHub Release and upload artifact
         uses: softprops/action-gh-release@v2
         with:
-          files: ninjaguardian-RumbleModUIPlus-${{ env.DLLVERSION }}.zip
+          files: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
           body: ${{ env.body }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
