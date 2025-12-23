@@ -5,10 +5,10 @@ permissions:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "*" ]
     tags: [ "v*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "*" ]
 
 jobs:
   check:
@@ -484,5 +484,3 @@ jobs:
         with:
           files: ninjaguardian-${{ vars.DLLNAME_NO_EXT }}-${{ env.DLLVERSION }}.zip
           body: ${{ env.body }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
