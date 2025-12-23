@@ -7,6 +7,7 @@
 
 ## What is this?
 Adds stuff for devs to RumbleModUI (also some bug fixes).
+One example is the ability to add folders to your mod settings!
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)

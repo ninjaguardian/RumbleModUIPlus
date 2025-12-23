@@ -366,7 +366,7 @@ namespace RumbleModUIPlus
         /// <inheritdoc/>
         public override void OnInitializeMelon() => Mod_Log_Patches.PatchAll(HarmonyInstance);
 
-        /* Test thingy
+        #if DEBUG
         public override void OnLateInitializeMelon() => UI.instance.UI_Initialized += OnUIInitialized;
         private static void OnUIInitialized()
         {
@@ -392,7 +392,7 @@ namespace RumbleModUIPlus
             ModUI.GetFromFile();
             UI.instance.AddMod(ModUI);
         }
-        */
+        #endif
 
         #region Harmony Patch Helpers
         private static FieldInfo Mod_Options = AccessTools.Field(typeof(UI), "Mod_Options");
@@ -461,19 +461,13 @@ namespace RumbleModUIPlus
         [HarmonyPatch(typeof(UI), "DoOnModSelect")]
         private static class UI_DoOnModSelect_Patch
         {
-            private static readonly Dictionary<UI, SettingOverride> settingOverride = new();
+            private static readonly Dictionary<UI, (int firstSummary, int firstNonFolder)> settingOverride = new();
             private static readonly Dictionary<UI, int> settingIdx = new();
-
-            private class SettingOverride
-            {
-                internal int firstSummary = -1;
-                internal int firstNonFolder = -1;
-            }
 
             private static void Prefix(UI __instance)
             {
                 if ((int)SettingsOverride.GetValue(__instance) == 0)
-                    settingOverride.Add(__instance, new SettingOverride());
+                    settingOverride.Add(__instance, (-1, -1));
                 settingIdx.Add(__instance, 0);
                 UI_OnSettingsSelectionChange_Patch.Empty(__instance);
             }
@@ -485,12 +479,12 @@ namespace RumbleModUIPlus
 
                 int count = UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Count;
 
-                if (settingOverride.TryGetValue(instance, out SettingOverride so))
+                if (settingOverride.TryGetValue(instance, out (int firstSummary, int firstNonFolder) value))
                 {
-                    if (so.firstSummary == -1 && setting.Tags.IsSummary)
-                        so.firstSummary = count;
-                    else if (so.firstNonFolder == -1 && setting is not ModSettingFolder)
-                        so.firstNonFolder = count;
+                    if (value.firstSummary == -1 && setting.Tags.IsSummary)
+                        value.firstSummary = count;
+                    else if (value.firstNonFolder == -1 && setting is not ModSettingFolder)
+                        value.firstNonFolder = count;
                 }
 
                 UI_OnSettingsSelectionChange_Patch.ItemLookup[instance].Add(count, idx);
@@ -513,13 +507,13 @@ namespace RumbleModUIPlus
 
             private static void SettingsOverrideHelper(UI instance)
             {
-                if (settingOverride.TryGetValue(instance, out SettingOverride so))
+                if (settingOverride.TryGetValue(instance, out (int firstSummary, int firstNonFolder) value))
                 {
                     SettingsOverride.SetValue(instance,
-                        so.firstSummary != -1
-                            ? so.firstSummary
-                            : so.firstNonFolder != -1
-                                ? so.firstNonFolder
+                        value.firstSummary != -1
+                            ? value.firstSummary
+                            : value.firstNonFolder != -1
+                                ? value.firstNonFolder
                                 : 0
                     );
 
