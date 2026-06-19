@@ -12,7 +12,7 @@ One example is the ability to add folders to your mod settings!
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
 2. Install [RumbleModUI](https://thunderstore.io/c/rumble/p/Baumritter/RumbleModUI)
-3. Drop Mods from .zip into RUMBLE's installation folder
+3. Drop Mods folder from .zip into RUMBLE's installation folder
 4. Play RUMBLE!
 
 ## Bug fixes and tweaks
