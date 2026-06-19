@@ -7,10 +7,10 @@
 
 		<Company>$(Authors)</Company>
 		<Title>RumbleModUIPlus</Title>
-		<Authors>ninjaguardian (github)</Authors>
+		<Authors>ninjaguardian</Authors>
 		<Description>Adds stuff for devs to RumbleModUI (also some bug fixes)</Description>
-		<Copyright>Copyright © 2025 ninjaguardian (github), This work is dedicated to the public domain under CC0 1.0.</Copyright>
-		<PackageLicenseExpression>CC0-1.0</PackageLicenseExpression>
+		<Copyright>Copyright © 2026 ninjaguardian</Copyright>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -46,7 +46,7 @@
 	</PropertyGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(Configuration)'=='Debug' Or '$(Configuration)'=='ReleaseAndSave'">
-		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$(LIBSDIRPATH)\Mods\&quot;" />
+		<Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;$([System.IO.Path]::Combine('$(LIBSDIRPATH)', 'Mods'))&quot;" />
 	</Target>
 
 	<ItemGroup>

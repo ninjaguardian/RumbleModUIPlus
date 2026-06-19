@@ -6,15 +6,14 @@
 [![Thunderstore](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3.2.0/assets/cozy/documentation/website_vector.svg)](https://thunderstore.io/c/rumble/p/ninjaguardian/RumbleModUIPlus)
 
 ## What is this?
-Adds stuff for devs to RumbleModUI (also some bug fixes).
+Adds stuff for devs to [RumbleModUI](https://thunderstore.io/c/rumble/p/Baumritter/RumbleModUI) (also some bug fixes).
 One example is the ability to add folders to your mod settings!
 
 ## Instructions
 1. Install [MelonLoader](https://github.com/LavaGang/MelonLoader)
-2. Run RUMBLE without mods
+2. Install [RumbleModUI](https://thunderstore.io/c/rumble/p/Baumritter/RumbleModUI)
 3. Drop Mods from .zip into RUMBLE's installation folder
-4. Install [RumbleModUI](https://thunderstore.io/c/rumble/p/Baumritter/RumbleModUI)
-5. Play RUMBLE!
+4. Play RUMBLE!
 
 ## Bug fixes and tweaks
 <details>
@@ -55,16 +54,16 @@ One example is the ability to add folders to your mod settings!
 <details>
   <summary>v1.0.2</summary>
   
-  - You can change your Settings.txt to use a ModFormatVersion instead of ModVersion. This makes it so that the user's settings are not deleted every update. To do this, reference RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify ModVersion, also specify ModFormatVersion (i.e. `mod.ModFormatVersion = "1.0.0"`).
+  - You can change your Settings.txt to use a `ModFormatVersion` instead of `ModVersion`. This makes it so that the user's settings are not deleted every update. To do this, reference RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify `ModVersion`, also specify `ModFormatVersion` (i.e. `mod.ModFormatVersion = "1.0.0"`).
   - `AddToListAtStart`, `AddToListAtIndex`, `AddDescriptionAtStart`, and `AddDescriptionAtIndex` are available.
 </details>
 <details>
   <summary>v1.0.0-v1.0.1</summary>
   
-  - In these versions, this mod only allows you to change your Settings.txt to use a ModFormatVersion instead of ModVersion. This makes it so that the user's settings are not deleted every update. To do this, reference RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify ModVersion, also specify ModFormatVersion (i.e. `mod.ModFormatVersion = "1.0.0"`).
+  - In these versions, this mod only allows you to change your Settings.txt to use a `ModFormatVersion` instead of `ModVersion`. This makes it so that the user's settings are not deleted every update. To do this, reference RumbleModUIPlus.dll and replace your call to `new RumbleModUI.Mod` with `new RumbleModUIPlus.Mod`. Next, where you specify `ModVersion`, also specify `ModFormatVersion` (i.e. `mod.ModFormatVersion = "1.0.0"`).
 </details>
 
 ## Help And Other Resources
-Get help and find other resources in the [Modding Discord](https://discord.gg/fsbcnZgzfa)
+Get help and find other resources in the [Modding Discord](https://discord.gg/qjWMy3DJsN)
 
-[![CC0-1.0 License](https://img.shields.io/badge/License-CC0_1.0_Universal-green.svg)](https://github.com/ninjaguardian/RumbleModUIPlus?tab=CC0-1.0-1-ov-file)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/ninjaguardian/RumbleModUIPlus?tab=MIT-1-ov-file)
